@@ -24,7 +24,6 @@ def create_connection(db_file):
 
 if __name__ == '__main__':
     dbloc = r'C:\Users\Jashan\PycharmProjects\ewb-pr\data'
-    create_connection(os.path.join(dbloc, 'keypoints.db'))
-    create_connection(os.path.join(dbloc, 'tracks.db'))
+    create_connection(os.path.join(dbloc, 'gpspoints.db'))
     print('Databases Created')
 
