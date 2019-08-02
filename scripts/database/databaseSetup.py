@@ -13,9 +13,11 @@ def create_connection(db_file):
     Creates a connection to the database
     :param db_file: the name of the sqlite database file
     """
+    # try to connect to a database and print version, will create a database if none exists
     try:
         conn = sqlite3.connect(db_file)
         print(sqlite3.version)
+    # else print an error statement
     except Error as e:
         print(e)
     finally:
