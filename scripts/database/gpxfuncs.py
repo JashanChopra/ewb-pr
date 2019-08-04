@@ -26,3 +26,21 @@ def loadgpx(filename):
 
     # return gpx file
     return gpx
+
+
+def loadgpxfiles():
+    """
+    This function loads all GPX files from the new_data folder to avoid having to manually enter datafile names
+    :return: a list of all the GPX file names in the directory
+    """
+    # import statements
+    import os
+
+    newdatadir = r'C:\Users\Jashan\PycharmProjects\ewb-pr\new_data'
+    filenames = []
+    for filename in os.listdir(newdatadir):
+        if filename.endswith('gpx'):
+            gpxfilepath = os.path.join(newdatadir, filename)
+            filenames.append(gpxfilepath)
+
+    return filenames
