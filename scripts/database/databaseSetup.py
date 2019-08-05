@@ -2,7 +2,6 @@
 This script creates the database used to store GPS point of interest data
 """
 
-
 import sqlite3
 from sqlite3 import Error
 import os

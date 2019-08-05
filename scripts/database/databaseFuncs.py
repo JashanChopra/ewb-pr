@@ -31,8 +31,8 @@ def create_poi(conn, point):
     :return: the last row id of the database
     """
 
-    sql = ''' INSERT INTO poi(name, lat, long, elevation, time)                 
-              VALUES(?,?,?,?,?) '''                                                 # sql insert statement
+    sql = ''' INSERT INTO poi(name, lat, long, elevation, time, trackname)                 
+              VALUES(?,?,?,?,?, ?) '''                                              # sql insert statement
     cur = conn.cursor()                                                             # connection cursor
     cur.execute(sql, point)                                                         # execute sql
     conn.commit()                                                                   # commit to db
@@ -49,8 +49,8 @@ def create_contour(conn, point):
     """
 
     # this function is similar to the above create_poi()
-    sql = ''' INSERT INTO contour(lat, long, elevation)
-              VALUES(?,?,?) '''
+    sql = ''' INSERT INTO contour(lat, long, elevation, trackname)
+              VALUES(?,?,?, ?) '''
     cur = conn.cursor()
     cur.execute(sql, point)
     conn.commit()
@@ -58,20 +58,34 @@ def create_contour(conn, point):
     cur.close()
 
 
-def create_table(conn, name):
+def create_table(conn, name, category=1):
     """
     Creates a table for the database with a valid conn
     :param conn: a valid DB sqlite3 connection
     :param name: the table name
     """
 
-    # execute sql for creating a table with any name
-    sql = f""" CREATE TABLE IF NOT EXISTS {name} (
-                                        id integer PRIMARY KEY,
-                                        lat,                                
-                                        long,
-                                        elevation
-                                    ); """                      # tablle names should be reset as required
+    if category == 1:
+        # execute sql for creating a table with any name
+        sql = f""" CREATE TABLE IF NOT EXISTS {name} (
+                                            id integer PRIMARY KEY,
+                                            name text NOT NULL,
+                                            lat,                                
+                                            long,
+                                            elevation,
+                                            time,
+                                            trackname text NOT NULL
+                                        ); """                      # table names should be reset by category
+    elif category == 2:
+        # execute sql for creating a table with any name
+        sql = f""" CREATE TABLE IF NOT EXISTS {name} (
+                                                id integer PRIMARY KEY,
+                                                lat,                                
+                                                long,
+                                                elevation,
+                                                trackname text NOT NULL
+                                            ); """  # table names should be reset by category
+
     try:
         c = conn.cursor()
         c.execute(sql)
@@ -80,10 +94,27 @@ def create_table(conn, name):
         print(e)
 
 
+def get_poi(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM poi")
+    allrows = cur.fetchall()
+
+    return allrows
+
+
+def get_track(conn):
+    cur = conn.cursor()
+    cur.execute("SELECT * from contour")
+    allrows = cur.fetchall()
+
+    return allrows
+
+
 if __name__ == '__main__':
     db = r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db'
     conn = get_conn(db)
-    # create_table(conn, 'contour')
+    create_table(conn, 'poi', category=1)
+    create_table(conn, 'contour', category=2)
 
 
 
