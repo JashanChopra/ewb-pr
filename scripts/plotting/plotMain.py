@@ -13,8 +13,8 @@ def setup_fig():
     stamen_terrain = cimgt.Stamen('terrain')
     fig = plt.figure(figsize=[10, 8])                                           # setup fig
     ax = fig.add_subplot(1, 1, 1, projection=stamen_terrain.crs)
-    ax.add_image(stamen_terrain, 9)
-    ax.set_extent([-65.790, -65.795, 18.295, 18.303], ccrs.Geodetic())  # left right down up
+    ax.add_image(stamen_terrain, 14)
+    ax.set_extent([-66.025, -66.057, 18.025, 18.065], ccrs.Geodetic())  # left right down up
     fig.subplots_adjust(top=0.950,
                         bottom=0,
                         left=0,
@@ -26,7 +26,7 @@ def setup_fig():
     ax.coastlines(resolution='50m', color='black', zorder=3)
     ax.stock_img()
 
-    ax.set_title('Test Map of Puerto Rico')
+    ax.set_title('Mulas Puerto Rico System [Rough Draft]')
 
     return fig, ax
 
@@ -62,6 +62,7 @@ def plot_track(conn, fig, ax):
     ax.add_geometries([line], ccrs.PlateCarree(),  # add to plot
                       facecolor='none', edgecolor='blue',
                       linewidth=0.5, label='Trajectories')
+    print('All Tracks Plotted')
     plt.show()
 
 
