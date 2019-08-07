@@ -110,6 +110,22 @@ def get_track(conn):
     return allrows
 
 
+def get_track_names(tracks):
+    """
+    This function will seperate tracks by their name to avoid lines cutting across sections
+    :param tracks: the list of each row from 'contours' table of the GPS database
+    :return: list of lists, each secondfold list contains rows of contour with the given name
+    """
+
+    names = []
+    for track in tracks:
+        names.append(track[4])
+
+    uniquenames = list(set(names))
+
+    return uniquenames
+
+
 if __name__ == '__main__':
     db = r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db'
     conn = get_conn(db)

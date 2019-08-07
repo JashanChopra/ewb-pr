@@ -2,14 +2,17 @@
 The main driver script for plotting
 """
 
-from databaseFuncs import get_conn, get_poi, get_track
+from databaseFuncs import get_conn, get_poi, get_track, get_track_names
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import shapely.geometry as sgeom
 import cartopy.io.img_tiles as cimgt
+import matplotlib.patches as mpatches
+import seaborn as sns
 
 
 def setup_fig():
+    sns.set(font_scale=1.6)
     stamen_terrain = cimgt.Stamen('terrain')
     fig = plt.figure(figsize=[10, 8])                                           # setup fig
     ax = fig.add_subplot(1, 1, 1, projection=stamen_terrain.crs)
@@ -37,7 +40,7 @@ def plot_poi(conn, fig, ax):
     print(points[0])
 
     for point in points:
-        ax.plot(point[3], point[2], marker='*', color='red', markersize=10, alpha=0.9,
+        ax.plot(point[3], point[2], marker='*', color='red', markersize=15, alpha=0.9,
                 transform=ccrs.Geodetic(), label=point[1])
         ax.text(point[3], point[2], f'{point[0]}', transform=ccrs.Geodetic())
 
@@ -47,23 +50,38 @@ def plot_poi(conn, fig, ax):
 def plot_track(conn, fig, ax):
 
     tracks = get_track(conn)
+    titles = get_track_names(tracks)
 
-    lats = []
-    longs = []
-    elevation = []
     # todo: this needs to be improved as far as efficciency goes big time
-    for track in tracks:
-        lats.append(track[1])
-        longs.append(track[2])
-        elevation.append(track[3])
+    for title in titles:
+        lats = []
+        longs = []
+        elevation = []
+        for track in tracks:
+            if track[4] == title:
+                lats.append(track[1])
+                longs.append(track[2])
+                elevation.append(track[3])
 
-    # create line for plot
-    line = sgeom.LineString(zip(longs, lats))
+        # create line for plot
+        line = sgeom.LineString(zip(longs, lats))
 
-    ax.add_geometries([line], ccrs.PlateCarree(),  # add to plot
-                      facecolor='none', edgecolor='blue',
-                      linewidth=0.5, label='Trajectories')
-    print('All Tracks Plotted')
+        ax.add_geometries([line], ccrs.PlateCarree(),  # add to plot
+                          facecolor='none', edgecolor='blue',
+                          linewidth=2, label='Trajectories')
+        print(f'{title} has been plotted')
+
+    print('All Tracks and Points of Interest have been added')
+    print('Generating plot')
+
+    # legend features
+    patches = [mpatches.Rectangle((0, 0), 1, 1, facecolor='blue'),
+               mpatches.Rectangle((0, 0), 1, 1, facecolor='red')]
+    labels = ['Distribution Path', 'Points of Interest']
+    ax.legend(handles=patches, loc='lower left',
+              fancybox=True, labels=labels,
+              bbox_to_anchor=(-0.1, 0.01))
+
     plt.show()
 
 
