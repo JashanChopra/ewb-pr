@@ -35,7 +35,7 @@ def create_poi(conn, point):
               VALUES(?,?,?,?,?, ?) '''                                              # sql insert statement
     cur = conn.cursor()                                                             # connection cursor
     cur.execute(sql, point)                                                         # execute sql
-    conn.commit()                                                                   # commit to db
+    # conn.commit()                                                                   # commit to db
     return cur.lastrowid                                                            # returns last row id
     cur.close()                                                                     # close db when finished
 

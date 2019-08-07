@@ -44,3 +44,30 @@ def loadgpxfiles():
             filenames.append(gpxfilepath)
 
     return filenames
+
+
+def haversine(slat, slong, elat, elong):
+    """
+    This function uses the haversine formula calculate the distance between
+    two GPS points
+    :return: distance
+    """
+
+    # imports
+    from math import radians, cos, sin, asin, sqrt
+
+    # map to radians
+    slat, slong, elat, elong = map(radians,
+                                   [slat, slong, elat, elong])
+
+    # haversine formula
+    dlong = elong - slong
+    dlat = elat - slat
+    arc = (sin(dlat/2)**2) + (cos(slat)) * (cos(elat)) * (sin(dlong/2)**2)
+    c = 2 * asin(sqrt(arc))
+    r = 6371
+    dist = c * r
+
+    return dist
+
+

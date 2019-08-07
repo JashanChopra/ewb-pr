@@ -39,6 +39,7 @@ def plot_poi(conn, fig, ax):
     for point in points:
         ax.plot(point[3], point[2], marker='*', color='red', markersize=10, alpha=0.9,
                 transform=ccrs.Geodetic(), label=point[1])
+        ax.annotate(f'{point[0]}', (point[3], point[2]))
 
     print('All points of interest have been plotted')
 
