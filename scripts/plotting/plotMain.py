@@ -17,7 +17,7 @@ def setup_fig():
     fig = plt.figure(figsize=[10, 8])                                           # setup fig
     ax = fig.add_subplot(1, 1, 1, projection=stamen_terrain.crs)
     ax.add_image(stamen_terrain, 14)
-    ax.set_extent([-66.025, -66.057, 18.025, 18.065], ccrs.Geodetic())  # left right down up
+    ax.set_extent([-66.025, -66.057, 18.025, 18.075], ccrs.Geodetic())  # left right down up
     fig.subplots_adjust(top=0.950,
                         bottom=0,
                         left=0,
@@ -37,7 +37,6 @@ def setup_fig():
 def plot_poi(conn, fig, ax):
 
     points = get_poi(conn)
-    print(points[0])
 
     for point in points:
         ax.plot(point[3], point[2], marker='*', color='red', markersize=15, alpha=0.9,
