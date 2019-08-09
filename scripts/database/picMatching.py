@@ -4,6 +4,7 @@ import datetime as dt
 from databaseFuncs import get_conn, get_poi
 import pandas as pd
 
+
 def filelist_pics(directory):
     """
     This function lists files from the given directory, but seperates them by filetype for pics
@@ -37,6 +38,9 @@ def get_raw_data(filename):
                            int(date[11:13]),
                            int(date[14:16]),
                            int(date[17:19]))
+    # convert the datetime from colorado time to UTC to match
+    convertoutc = dt.timedelta(hours=7)
+    datetime = datetime + convertoutc
 
     imgdet = [f.name[45:], datetime]
     return imgdet
@@ -59,7 +63,7 @@ def conv_poi_dt(list):
     return datetimes
 
 
-if __name__ == '__main__':
+def match_pictures():
     direc = r'C:\Users\Jashan\Desktop\Puerto Rico Pictures'
     conn = get_conn(r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db')
     raws = filelist_pics(direc)
@@ -69,23 +73,38 @@ if __name__ == '__main__':
     points = get_poi(conn)
     points = pd.DataFrame(points)
     points.columns = colnames
+    points['datetime'] = conv_poi_dt(points['dates'])
 
-    empty = pd.DataFrame()
-
+    fullimg = []
+    print(f'Getting exif data for {len(raws)} photos')
     for file in raws:
         imgdata = get_raw_data(file)
-        imgdata = pd.DataFrame(imgdata).transpose()
-        imgdata.columns = ['filename', 'datetime']
+        fullimg.append(list(imgdata))
+    fullimg = pd.DataFrame(fullimg)
+    fullimg.columns = ['filename', 'datetime']
 
-        points['datetime'] = conv_poi_dt(points['dates'])
+    # convert datetimes because match does not work with datetime64
+    fullimg['datetime'] = pd.to_datetime(fullimg['datetime'], utc=True)
+    points['datetime'] = pd.to_datetime(points['datetime'], utc=True)
 
-        match = pd.merge_asof(imgdata.sort_values('datetime'),
-                              points.sort_values('datetime'),
-                              by='datetime',
-                              direction='nearest')
-        empty = empty.append(match)
+    print('Matching point of interest values to each photo')
+    match = pd.merge_asof(fullimg.sort_values('datetime'),
+                          points.sort_values('datetime'),
+                          on='datetime',
+                          direction='nearest',
+                          tolerance=pd.Timedelta('10 minutes'))
 
-    finaloutput = [empty['filename'], empty['datetime'], match['id']]
-    print(finaloutput)
+    # remove images that have no point of interest matches
+    match.dropna(how='any', axis=0, inplace=True)
+
+    return match
+
+
+if __name__ == '__main__':
+
+    output = match_pictures()
+    # Todo: put this in the database for ease
+    print(len(output))
+    print(output)
 
 
