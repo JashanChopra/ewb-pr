@@ -16,7 +16,7 @@ def setup_fig():
     stamen_terrain = cimgt.Stamen('terrain')
     fig = plt.figure(figsize=[10, 8])                                           # setup fig
     ax = fig.add_subplot(1, 1, 1, projection=stamen_terrain.crs)
-    ax.add_image(stamen_terrain, 14)
+    ax.add_image(stamen_terrain, 15)
     ax.set_extent([-66.025, -66.057, 18.025, 18.075], ccrs.Geodetic())  # left right down up
     fig.subplots_adjust(top=0.950,
                         bottom=0,

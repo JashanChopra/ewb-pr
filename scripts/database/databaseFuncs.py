@@ -130,7 +130,6 @@ if __name__ == '__main__':
     db = r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db'
     conn = get_conn(db)
     create_table(conn, 'poi', category=1)
-    create_table(conn, 'contour', category=2)
 
 
 

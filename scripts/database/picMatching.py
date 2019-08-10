@@ -105,6 +105,6 @@ if __name__ == '__main__':
     output = match_pictures()
     # Todo: put this in the database for ease
     print(len(output))
-    print(output)
+
 
 
