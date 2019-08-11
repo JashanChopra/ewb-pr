@@ -3,6 +3,16 @@ import pandas as pd
 from databaseFuncs import get_conn, get_poi, get_track, get_track_names
 
 
+def addtodb(conn, df):
+    """
+    This function combines the two elevation values and then adds it to the db
+    :param conn: a valid sqlite3 db connection
+    :param df: dataframe of combined GPS and LIDAR data
+    :return:
+    """
+
+
+
 def bulkprocess(df, x, tolerance):
     """
     This function performs a cross merge on two dataframes with latitude and longitude data, and then saves it to a csv file,
@@ -83,6 +93,7 @@ if __name__ == '__main__':
     reader = pd.read_csv('lidar.csv', chunksize=1000)                                       # read lidar data chunked
     tol = 0.0015                                                                              # kilometer tolerance
     [bulkprocess(gps, r, tol) for r in reader]                                              # merge operation on chunk
+
 
 
 

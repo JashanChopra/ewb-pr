@@ -2,7 +2,8 @@
 The main driver script for plotting
 """
 
-from databaseFuncs import get_conn, get_poi, get_track, get_track_names
+from databaseFuncs import get_conn, get_track, get_track_names
+from gpxfuncs import loadgpx, loadgpxfiles
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import shapely.geometry as sgeom
@@ -16,7 +17,7 @@ def setup_fig():
     stamen_terrain = cimgt.Stamen('terrain')
     fig = plt.figure(figsize=[10, 8])                                           # setup fig
     ax = fig.add_subplot(1, 1, 1, projection=stamen_terrain.crs)
-    ax.add_image(stamen_terrain, 15)
+    ax.add_image(stamen_terrain, 13)
     ax.set_extent([-66.025, -66.057, 18.025, 18.075], ccrs.Geodetic())  # left right down up
     fig.subplots_adjust(top=0.950,
                         bottom=0,
@@ -34,32 +35,33 @@ def setup_fig():
     return fig, ax
 
 
-def plot_poi(conn, fig, ax):
+def plot_track(fig, ax, files):
 
-    points = get_poi(conn)
+    for filename in files:
+        try:
+            gpx = loadgpx(filename)
+            print(f'{filename} read properly')
+            print('*------------*')
+        except FileNotFoundError as error:
+            print(f'{filename} not found in directory, try again')
+            pass
 
-    for point in points:
-        ax.plot(point[3], point[2], marker='*', color='red', markersize=15, alpha=0.9,
-                transform=ccrs.Geodetic(), label=point[1])
-        ax.text(point[3], point[2], f'{point[0]}', transform=ccrs.Geodetic())
+        # Todo: Continue to test smoothing function
+        # This is testing gpxpy smoothing algorithims
+        gpx.reduce_points(2000, min_distance=10)
+        gpx.smooth(vertical=True, horizontal=True)
 
-    print('All points of interest have been plotted')
-
-
-def plot_track(conn, fig, ax):
-
-    tracks = get_track(conn)
-    titles = get_track_names(tracks)
-
-    for title in titles:
         lats = []
         longs = []
         elevation = []
-        for track in tracks:
-            if track[4] == title:
-                lats.append(track[1])
-                longs.append(track[2])
-                elevation.append(track[3])
+        print('Adding each point in track, this may take a moment')
+        for track in gpx.tracks:                                                            # loop over each track
+            for segment in track.segments:                                                  # loop over each segment
+                for point in segment.points:                                                # loop over each point
+                    addpoint = [point.latitude, point.longitude, point.elevation]           # create db entry
+                    lats.append(addpoint[0])
+                    longs.append(addpoint[1])
+                    elevation.append(addpoint[2])
 
         # create line for plot
         line = sgeom.LineString(zip(longs, lats))
@@ -67,9 +69,9 @@ def plot_track(conn, fig, ax):
         ax.add_geometries([line], ccrs.PlateCarree(),  # add to plot
                           facecolor='none', edgecolor='blue',
                           linewidth=2, label='Trajectories')
-        print(f'{title} has been plotted')
+        print(f'track has been plotted')
 
-    print('All Tracks and Points of Interest have been added')
+    print('All Tracks have been added')
     print('Generating plot')
 
     # legend features
@@ -85,7 +87,7 @@ def plot_track(conn, fig, ax):
 
 if __name__ == "__main__":
     conn = get_conn(r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db')
+    files = loadgpxfiles()
 
     fig, ax = setup_fig()
-    plot_poi(conn, fig, ax)
-    plot_track(conn, fig, ax)
+    plot_track(fig, ax, files)

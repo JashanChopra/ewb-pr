@@ -86,6 +86,15 @@ def create_table(conn, name, category=1):
                                                 trackname text NOT NULL
                                             ); """  # table names should be reset by category
 
+    elif category == 3:
+        # execute sql for creating a table with any name
+        sql = f""" CREATE TABLE IF NOT EXISTS {name} (
+                                                    id integer PRIMARY KEY,
+                                                    lat,                                
+                                                    long,
+                                                    elevation
+                                                    ); """  # table names should be reset by category
+
     try:
         c = conn.cursor()
         c.execute(sql)
@@ -129,7 +138,7 @@ def get_track_names(tracks):
 if __name__ == '__main__':
     db = r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db'
     conn = get_conn(db)
-    create_table(conn, 'poi', category=1)
+    create_table(conn, 'cleaned', category=3)
 
 
 
