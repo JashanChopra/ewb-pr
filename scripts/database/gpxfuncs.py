@@ -6,6 +6,8 @@ This script contains general functions required for the manipulation of gpx funt
 import gpxpy
 import os
 import gpxpy.gpx
+import numpy as np
+from convToRadians import conv
 
 
 def loadgpx(filename):
@@ -53,20 +55,17 @@ def haversine(slat, slong, elat, elong):
     :return: distance
     """
 
-    # imports
-    from math import radians, cos, sin, asin, sqrt
-
-    # map to radians
-    slat, slong, elat, elong = map(radians,
-                                   [slat, slong, elat, elong])
+    # map to radians and convert to numpy array
+    slat = conv(slat)
+    slong = conv(slong)
+    elat = conv(elat)
+    elong = conv(elong)
 
     # haversine formula
-    dlong = elong - slong
-    dlat = elat - slat
-    arc = (sin(dlat/2)**2) + (cos(slat)) * (cos(elat)) * (sin(dlong/2)**2)
-    c = 2 * asin(sqrt(arc))
-    r = 6371
-    dist = c * r
+    d = np.sin((elat - slat)/2)**2 + np.cos(slat) * np.cos(elat) * np.sin((elong - slong)/2)**2
+    arc = np.arcsin(np.sqrt(d))
+    r = 6372.8
+    dist = 2 * r * arc
 
     return dist
 
