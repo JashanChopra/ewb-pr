@@ -1,4 +1,4 @@
-from gpxfuncs import loadgpx, haversine
+from gpxfuncs import loadgpx, haversine, loadgpxfiles
 import pandas as pd
 from databaseFuncs import get_conn, get_poi, get_track, get_track_names
 
@@ -8,9 +8,9 @@ def addtodb(conn, df):
     This function combines the two elevation values and then adds it to the db
     :param conn: a valid sqlite3 db connection
     :param df: dataframe of combined GPS and LIDAR data
-    :return:
     """
 
+    # read final outputted csv
 
 
 def bulkprocess(df, x, tolerance):
@@ -64,13 +64,27 @@ def get_lidar(dir):
     return lidarDF
 
 
-def get_gps(conn):
+def get_gps(files):
 
-    tracks = get_track(conn)                                                # get each track in sql database
+    for filename in files:
+        try:
+            gpx = loadgpx(filename)
+            print(f'{filename} read properly')
+        except FileNotFoundError as error:
+            print(f'{filename} not found in directory, try again')
+            pass
 
-    alltracks = []                                                          # preallocate list
-    for track in tracks:                                                    # loop throuhg each track
-        alltracks.append([track[0], track[1], track[2], track[3]])          # append name, lat, long, elev
+        # Apply gpxpy smoothing algorithms
+        gpx.reduce_points(2000, min_distance=10)
+        gpx.smooth(vertical=True, horizontal=True)
+
+        alltracks = []
+        for track in gpx.tracks:                                                            # loop over each track
+            for segment in track.segments:                                                  # loop over each segment
+                for point in segment.points:                                                # loop over each point
+                    # create point entry
+                    addpoint = [track.name, point.latitude, point.longitude, point.elevation]
+                    alltracks.append(addpoint)
 
     gpsDF = pd.DataFrame(alltracks)                                         # convert to dataframe
     gpsDF.columns = ['name', 'lat', 'long', 'elev']                         # rename columns
@@ -82,6 +96,7 @@ def get_gps(conn):
 if __name__ == '__main__':
     dir = r'C:\Users\Jashan\PycharmProjects\ewb-pr\gpx\5ft contours.gpx'                    # directory of lidar data
     conn = get_conn(r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db')            # create sqllite conn
+    files = loadgpxfiles()
 
     lidar = get_lidar(dir)                                                                  # get lidar data
     lidar.to_csv('lidar.csv', index_label=False)                                            # save to csv
@@ -93,8 +108,3 @@ if __name__ == '__main__':
     reader = pd.read_csv('lidar.csv', chunksize=1000)                                       # read lidar data chunked
     tol = 0.0015                                                                              # kilometer tolerance
     [bulkprocess(gps, r, tol) for r in reader]                                              # merge operation on chunk
-
-
-
-
-    # Nick: "Im not saying Shrek Musical was a good musical, but I just went home and cried after it."
