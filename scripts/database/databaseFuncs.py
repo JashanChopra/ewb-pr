@@ -92,7 +92,8 @@ def create_table(conn, name, category=1):
                                                     id integer PRIMARY KEY,
                                                     lat,                                
                                                     long,
-                                                    elevation
+                                                    elevation,
+                                                    trackname text NOT NULL
                                                     ); """  # table names should be reset by category
 
     try:
