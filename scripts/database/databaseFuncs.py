@@ -58,6 +58,23 @@ def create_contour(conn, point):
     cur.close()
 
 
+def create_meter(conn, point):
+    """
+    Creates a new meter for the database
+    :param conn: the sqlite3 connection
+    :param point: the meter point, a tuple with required fields
+    :return: the last row id of the database
+    """
+
+    sql = ''' INSERT INTO meter(time, lat, long, elevation)
+                  VALUES(?,?,?, ?) '''
+    cur = conn.cursor()
+    cur.execute(sql, point)
+    conn.commit()
+    return cur.lastrowid
+    cur.close()
+
+
 def create_table(conn, name, category=1):
     """
     Creates a table for the database with a valid conn
@@ -94,6 +111,16 @@ def create_table(conn, name, category=1):
                                                     long,
                                                     elevation,
                                                     trackname text NOT NULL
+                                                    ); """  # table names should be reset by category
+
+    elif category == 4:
+        # execute sql for creating a table with any name
+        sql = f""" CREATE TABLE IF NOT EXISTS {name} (
+                                                    id integer PRIMARY KEY,
+                                                    time,
+                                                    lat,                                
+                                                    long,
+                                                    elevation
                                                     ); """  # table names should be reset by category
 
     try:
@@ -139,7 +166,7 @@ def get_track_names(tracks):
 if __name__ == '__main__':
     db = r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db'
     conn = get_conn(db)
-    create_table(conn, 'cleaned', category=3)
+    create_table(conn, 'meter', category=4)
 
 
 

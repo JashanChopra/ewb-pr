@@ -10,6 +10,7 @@ import shapely.geometry as sgeom
 import cartopy.io.img_tiles as cimgt
 import matplotlib.patches as mpatches
 import seaborn as sns
+import pandas as pd
 
 
 def setup_fig():
@@ -36,40 +37,15 @@ def setup_fig():
 
 
 def plot_track(fig, ax, files):
+    clean = pd.read_csv(r'C:\Users\Jashan\PycharmProjects\ewb-pr\scripts\database\final_tracks.csv')
 
-    for filename in files:
-        try:
-            gpx = loadgpx(filename)
-            print(f'{filename} read properly')
-            print('*------------*')
-        except FileNotFoundError as error:
-            print(f'{filename} not found in directory, try again')
-            pass
+    # create line for plot
+    line = sgeom.LineString(zip(clean['long'], clean['lat']))
 
-        # Todo: Continue to test smoothing function
-        # This is testing gpxpy smoothing algorithims
-        gpx.reduce_points(2000, min_distance=10)
-        gpx.smooth(vertical=True, horizontal=True)
-
-        lats = []
-        longs = []
-        elevation = []
-        print('Adding each point in track, this may take a moment')
-        for track in gpx.tracks:                                                            # loop over each track
-            for segment in track.segments:                                                  # loop over each segment
-                for point in segment.points:                                                # loop over each point
-                    addpoint = [point.latitude, point.longitude, point.elevation]           # create db entry
-                    lats.append(addpoint[0])
-                    longs.append(addpoint[1])
-                    elevation.append(addpoint[2])
-
-        # create line for plot
-        line = sgeom.LineString(zip(longs, lats))
-
-        ax.add_geometries([line], ccrs.PlateCarree(),  # add to plot
-                          facecolor='none', edgecolor='blue',
-                          linewidth=2, label='Trajectories')
-        print(f'track has been plotted')
+    ax.add_geometries([line], ccrs.PlateCarree(),  # add to plot
+                      facecolor='none', edgecolor='blue',
+                      linewidth=2, label='Trajectories')
+    print(f'track has been plotted')
 
     print('All Tracks have been added')
     print('Generating plot')

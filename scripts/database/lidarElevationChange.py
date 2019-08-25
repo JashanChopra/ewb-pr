@@ -11,22 +11,32 @@ def addtodb():
     """
 
     # read final outputted csv
-    clean = pd.read_csv('comb.csv', header=None)
-    clean.columns = ['lat', 'long', 'elev_gps', 'time', 'time2', 'elev_lidar', 'dist']
-    elev = []
+    clean = pd.read_csv('comb.csv', header=None, engine='python')
+    clean.columns = ['id', 'name', 'lat', 'long', 'elev_gps', 'time', 'name2', 'time2', 'elev_lidar', 'dist']
+    clean.drop(['time2', 'name2'], axis=1, inplace=True)
+    clean.sort_values('time', inplace=True)
+
     # combine elevations
+    elev = []
     for i in list(range(len(clean))):
         # If the elevation difference is greater than one contour, use the LIDAR elevation
-        if abs(clean['elev_lidar'].iloc[i] - clean['elev_gps'].iloc[i]) > 2:
-            elev.append((clean['elev_lidar'].iloc[i] + clean['elev_gps'].iloc[i]) / 2)
+        if abs(clean['elev_lidar'].iloc[i] - float(clean['elev_gps'].iloc[i])) > 2:
+            elev.append((clean['elev_lidar'].iloc[i] + float(clean['elev_gps'].iloc[i])) / 2)
         # Else, we use the average of the GPS elev and the lidar elev
         else:
             elev.append(clean['elev_lidar'].iloc[i])
+    clean.drop(['elev_gps', 'elev_lidar'], axis=1, inplace=True)
     clean['elev'] = elev
-    clean.drop(['elev_gps', 'elev_lidar', 'time2', 'dist'], axis=1, inplace=True)
+
+    # remove duplicates, keep the lowest distance value
+    clean.sort_values('dist', inplace=True)
+    clean.drop_duplicates(subset='time', keep='first', inplace=True)
+    clean.sort_values('time', inplace=True)
 
     # output to csv
     clean.to_csv('final_poi.csv', mode='a', index=False)
+    print('*---------------------*')
+    print('*Final output saved')
 
 
 def bulkprocess(df, x, tolerance):
@@ -49,18 +59,19 @@ def bulkprocess(df, x, tolerance):
     print('Haversine Distance Calculated')
 
     # find the closest match based on the haversine difference
-    closest = merged.loc[merged.groupby(['name'])['dist'].idxmin()]
+    closest = merged.loc[merged.groupby(['id'])['dist'].idxmin()]
     closest = closest[closest['dist'] < tolerance]                          # remove values if distance is poor match
     print('Closest matches found')
 
     # merge the closest on the name with following suffixes, dropping old data
-    data_locs = df.merge(closest, on=['name'],
+    data_locs = df.merge(closest, on=['id'],
                          suffixes=('', '_cl')).drop(['latitude', 'longitude',
                                                      'lat_cl', 'long_cl',
                                                      'elev_cl'], axis=1)
     # save to a csv file with addition
     data_locs.to_csv('comb.csv', mode='a', header=False, index=False)
     print('Single LIDAR merge performmed')
+    print('*---------------------------*')
 
 
 def get_lidar(dir):
@@ -85,9 +96,12 @@ def get_gps(files):
     points = get_poi(conn)
     alltracks = []
     for point in points:
-        alltracks.append([point[1], point[2], point[3], point[4], point[5]])
+        alltracks.append([point[0], point[1], point[2], point[3], point[4], point[5]])
 
-    print('All points of interest have been plotted')
+    """
+    This code block changes the LIDAR matching from the GPS points of interest to the general tracks
+    """
+    # alltracks = []
     # for filename in files:
     #     try:
     #         gpx = loadgpx(filename)
@@ -100,35 +114,34 @@ def get_gps(files):
     #     gpx.reduce_points(5000, min_distance=2)
     #     gpx.smooth(vertical=True, horizontal=True)
     #
-    #     alltracks = []
     #     for track in gpx.tracks:                                                            # loop over each track
     #         for segment in track.segments:                                                  # loop over each segment
     #             for point in segment.points:                                                # loop over each point
     #                 # create point entry
-    #                 addpoint = [gpx.tracks[0].name, point.latitude, point.longitude, point.elevation]
+    #                 addpoint = [gpx.tracks[0].name, point.latitude, point.longitude, point.elevation, point.time]
     #                 alltracks.append(addpoint)
 
     gpsDF = pd.DataFrame(alltracks)                                         # convert to dataframe
-    gpsDF.columns = ['name', 'lat', 'long', 'elev', 'time']                 # rename columns
+    gpsDF.columns = ['id', 'name', 'lat', 'long', 'elev', 'time']                 # rename columns
 
     print('GPS Dataframe Created')                                          # print statement
     return gpsDF
 
 
 if __name__ == '__main__':
-    dir = r'C:\Users\Jashan\PycharmProjects\ewb-pr\gpx\5ft contours.gpx'                    # directory of lidar data
-    conn = get_conn(r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db')            # create sqllite conn
+    dir = r'C:\Users\jasha\PycharmProjects\ewb-pr\gpx\5ft contours.gpx'                    # directory of lidar data
+    conn = get_conn(r'C:\Users\jasha\PycharmProjects\ewb-pr\data\gpspoints.db')            # create sqllite conn
     files = loadgpxfiles()
 
     # lidar = get_lidar(dir)                                                                  # get lidar data
     # lidar.to_csv('lidar.csv', index_label=False)                                            # save to csv
-    # del(lidar)                                                                              # delete to conserve memory
+    # del(lidar)                                                                              # delete to cons mem
     # print('LIDAR Data saved to CSV')                                                        # print statement
 
     gps = get_gps(files)                                                                     # get gps data
 
     reader = pd.read_csv('lidar.csv', chunksize=1000)                                       # read lidar data chunked
-    tol = 0.0015                                                                              # kilometer tolerance
+    tol = 0.1                                                                               # kilometer tolerance
     [bulkprocess(gps, r, tol) for r in reader]                                              # merge operation on chunk
 
     addtodb()
