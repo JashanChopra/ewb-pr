@@ -3,18 +3,18 @@ import pandas as pd
 from databaseFuncs import get_conn, get_poi, get_track, get_track_names
 
 
-def addtodb():
+def createcsv():
     """
-    This function combines the two elevation values and then adds it to the db
+    This function combines the two elevation values and then outputs it as a csv
     :param conn: a valid sqlite3 db connection
     :param df: dataframe of combined GPS and LIDAR data
     """
 
     # read final outputted csv
     clean = pd.read_csv('comb.csv', header=None, engine='python')
-    clean.columns = ['id', 'name', 'lat', 'long', 'elev_gps', 'time', 'name2', 'time2', 'elev_lidar', 'dist']
-    clean.drop(['time2', 'name2'], axis=1, inplace=True)
-    clean.sort_values('time', inplace=True)
+    clean.columns = ['id', 'lat', 'long', 'elev_gps', 'elev_lidar', 'dist']
+    # clean.drop(['time2', 'name2'], axis=1, inplace=True)
+    clean.sort_values('id', inplace=True)
 
     # combine elevations
     elev = []
@@ -30,11 +30,11 @@ def addtodb():
 
     # remove duplicates, keep the lowest distance value
     clean.sort_values('dist', inplace=True)
-    clean.drop_duplicates(subset='time', keep='first', inplace=True)
-    clean.sort_values('time', inplace=True)
+    clean.drop_duplicates(subset='id', keep='first', inplace=True)
+    clean.sort_values('id', inplace=True)
 
     # output to csv
-    clean.to_csv('final_poi.csv', mode='a', index=False)
+    clean.to_csv('final_meters.csv', mode='a', index=False)
     print('*---------------------*')
     print('*Final output saved')
 
@@ -128,20 +128,44 @@ def get_gps(files):
     return gpsDF
 
 
+def get_meters():
+    import os
+    import numpy as np
+
+    maindir = r'C:\Users\jasha\PycharmProjects\ewb-pr'
+    datadir = os.path.join(maindir, 'data')
+    meterdir = os.path.join(datadir, 'Puntos GPS metros Mulas.xlsx')
+    meter = pd.read_excel(meterdir)
+
+    # data trimming
+    df2 = meter.iloc[:, 0].str.split(' ', expand=True)
+    df2.replace('', np.nan, inplace=True)
+    df2.dropna(axis=1, how='all', inplace=True)
+    df2.drop([0, 7, 8, 23, 24, 25, 30, 31, 35, 36, 37, 40, 41, 42, 43, 44, 45], axis=1, inplace=True)
+    df2.dropna(axis=0, how='any', inplace=True)
+    df2.reset_index(inplace=True)
+    df2.columns = ['id', 'lat', 'long', 'elev']
+
+    return df2
+
+
 if __name__ == '__main__':
     dir = r'C:\Users\jasha\PycharmProjects\ewb-pr\gpx\5ft contours.gpx'                    # directory of lidar data
     conn = get_conn(r'C:\Users\jasha\PycharmProjects\ewb-pr\data\gpspoints.db')            # create sqllite conn
-    files = loadgpxfiles()
+
+    # files = loadgpxfiles()
 
     # lidar = get_lidar(dir)                                                                  # get lidar data
     # lidar.to_csv('lidar.csv', index_label=False)                                            # save to csv
     # del(lidar)                                                                              # delete to cons mem
     # print('LIDAR Data saved to CSV')                                                        # print statement
 
-    gps = get_gps(files)                                                                     # get gps data
+    # gps = get_gps(files)                                                                     # get gps data
+    meterdata = get_meters()
 
-    reader = pd.read_csv('lidar.csv', chunksize=1000)                                       # read lidar data chunked
+    lidarspot = r'C:\Users\jasha\PycharmProjects\ewb-pr\data\lidar.csv'
+    reader = pd.read_csv(lidarspot, chunksize=1000)                                       # read lidar data chunked
     tol = 0.1                                                                               # kilometer tolerance
-    [bulkprocess(gps, r, tol) for r in reader]                                              # merge operation on chunk
+    [bulkprocess(meterdata, r, tol) for r in reader]                                        # merge operation on chunk
 
-    addtodb()
+    createcsv()

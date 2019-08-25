@@ -9,6 +9,7 @@ def conv(item):
     """
 
     arr = np.asarray(item)
+    arr = arr.astype(float)
     radlist = np.deg2rad(arr)
 
     return radlist

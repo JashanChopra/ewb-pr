@@ -66,8 +66,8 @@ def create_meter(conn, point):
     :return: the last row id of the database
     """
 
-    sql = ''' INSERT INTO meter(time, lat, long, elevation)
-                  VALUES(?,?,?, ?) '''
+    sql = ''' INSERT INTO meter(lat, long, elevation)
+                  VALUES(?,?, ?) '''
     cur = conn.cursor()
     cur.execute(sql, point)
     conn.commit()
@@ -117,7 +117,6 @@ def create_table(conn, name, category=1):
         # execute sql for creating a table with any name
         sql = f""" CREATE TABLE IF NOT EXISTS {name} (
                                                     id integer PRIMARY KEY,
-                                                    time,
                                                     lat,                                
                                                     long,
                                                     elevation
@@ -164,9 +163,9 @@ def get_track_names(tracks):
 
 
 if __name__ == '__main__':
-    db = r'C:\Users\Jashan\PycharmProjects\ewb-pr\data\gpspoints.db'
+    db = r'C:\Users\Jasha\PycharmProjects\ewb-pr\data\gpspoints.db'
     conn = get_conn(db)
-    create_table(conn, 'meter', category=4)
+    create_table(conn, 'meters', category=4)
 
 
 
