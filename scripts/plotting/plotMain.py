@@ -2,7 +2,7 @@
 The main driver script for plotting
 """
 
-from databaseFuncs import get_conn, get_poi, get_track, get_track_names
+from old.databaseFuncs import get_conn, get_poi, get_track, get_track_names
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import shapely.geometry as sgeom

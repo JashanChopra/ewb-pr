@@ -1,7 +1,7 @@
 import os
 import exifread
 import datetime as dt
-from databaseFuncs import get_conn, get_poi
+from old.databaseFuncs import get_conn, get_poi
 import pandas as pd
 
 

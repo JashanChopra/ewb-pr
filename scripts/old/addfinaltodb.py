@@ -6,7 +6,7 @@ time. *8/14/2019)
 # import libraries
 import pandas as pd
 import os
-from databaseFuncs import get_conn, create_meter
+from old.databaseFuncs import get_conn, create_meter
 
 
 def adddb(conn):

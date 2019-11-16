@@ -2,8 +2,8 @@
 The main driver script for plotting
 """
 
-from databaseFuncs import get_conn, get_track, get_track_names
-from gpxfuncs import loadgpx, loadgpxfiles
+from old.databaseFuncs import get_conn
+from gpxfuncs import loadgpxfiles
 import cartopy.crs as ccrs
 import matplotlib.pyplot as plt
 import shapely.geometry as sgeom

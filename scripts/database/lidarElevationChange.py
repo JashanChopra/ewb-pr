@@ -1,6 +1,6 @@
-from gpxfuncs import loadgpx, haversine, loadgpxfiles
+from gpxfuncs import loadgpx, haversine
 import pandas as pd
-from databaseFuncs import get_conn, get_poi, get_track, get_track_names
+from old.databaseFuncs import get_conn, get_poi
 
 
 def createcsv():
@@ -153,12 +153,6 @@ if __name__ == '__main__':
     dir = r'C:\Users\jasha\PycharmProjects\ewb-pr\gpx\5ft contours.gpx'                    # directory of lidar data
     conn = get_conn(r'C:\Users\jasha\PycharmProjects\ewb-pr\data\gpspoints.db')            # create sqllite conn
 
-    # files = loadgpxfiles()
-
-    # lidar = get_lidar(dir)                                                                  # get lidar data
-    # lidar.to_csv('lidar.csv', index_label=False)                                            # save to csv
-    # del(lidar)                                                                              # delete to cons mem
-    # print('LIDAR Data saved to CSV')                                                        # print statement
 
     # gps = get_gps(files)                                                                     # get gps data
     meterdata = get_meters()

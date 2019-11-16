@@ -5,7 +5,7 @@ for it can be found in the Puerto Rico Google Drive under the 2018-2019 --> Subt
 
 # import libraries
 from database.gpxfuncs import loadgpx, loadgpxfiles
-from database.databaseFuncs import create_poi, get_conn, create_contour
+from old.databaseFuncs import create_poi, get_conn, create_contour
 import shutil
 import os
 
@@ -82,8 +82,8 @@ def moveoldfiles(newfiles):
     :param newfiles: list of valid GPX filenames
     """
 
-    curpath = r'C:\Users\Jashan\PycharmProjects\ewb-pr\new_data'
-    destpath = r'C:\Users\Jashan\PycharmProjects\ewb-pr\gpx'
+    curpath = r'C:\Users\Jasha\PycharmProjects\ewb-pr\new_data'
+    destpath = r'C:\Users\Jasha\PycharmProjects\ewb-pr\gpx'
     for filename in newfiles:
 
         # old and new filepaths
