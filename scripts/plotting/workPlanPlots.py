@@ -42,7 +42,7 @@ def setup_fig():
                         hspace=0.27,
                         wspace=0.02)
     ax.background_patch.set_visible(False)
-    ax.outline_patch.set_visible(True)
+    ax.outline_patch.set_visible(False)
     fig.patch.set_facecolor('none')
     ax.patch.set_alpha(0.0)
 
@@ -67,9 +67,10 @@ def plot_track(fig, ax, trackdir, plotdir):
         # elevation = []
         for index, track in tracks.iterrows():
             if track[1] == title:
-                lats.append(track[2])
-                longs.append(track[3])
-                # elevation.append(track[3])
+                # filter out GPS points to the left of the last house!!
+                if track[3] > -66.044218:
+                    lats.append(track[2])
+                    longs.append(track[3])
 
         # create line for plot
         line = sgeom.LineString(zip(longs, lats))
@@ -104,13 +105,16 @@ def plot_poi(fig, ax, poidir):
     points = pd.read_csv(poidir)
 
     for index, row in points.iterrows():
-        if index in [0, 1, 2]:
+        all = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+        if index in [0]:
             ax.plot(row[3], row[2], marker='*', color='red', markersize=22, alpha=0.9,
                     transform=ccrs.Geodetic())
-        if index in [0, 1]:
-            ax.text(row[3] + .0008, row[2] + .0005, f'{index}', color='black', transform=ccrs.Geodetic())
-        elif index in [2]:
-            ax.text(row[3] + .0008, row[2] - .0020, f'{index}', color='black', transform=ccrs.Geodetic())
+        if index in [0]:
+            ax.text(row[3] - .0018, row[2] + .0010, f'{index+1}', color='white', transform=ccrs.Geodetic())
+        # elif index in [2]:
+        #     ax.text(row[3] + .0001, row[2] - .00006, f'{index+1}', color='white', transform=ccrs.Geodetic())
+        # else:
+        #     ax.text(row[3] + .00007, row[2] - .000035, f'{index+1}', color='white', transform=ccrs.Geodetic())
 
     print('All points of interest have been plotted')
 

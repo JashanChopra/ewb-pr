@@ -29,7 +29,7 @@ def bulkprocess(df, x):
     print('Haversine Distance Calculated')
 
     # find the closest match based on the haversine difference
-    closest = merged.loc[merged.groupby(['id'])['dist'].idxmin()]                          # remove values if distance is poor match
+    closest = merged.loc[merged.groupby(['id'])['dist'].idxmin()]
     print('Closest matches found')
 
     # merge the closest on the name with following suffixes, dropping old data
@@ -38,11 +38,6 @@ def bulkprocess(df, x):
     closest.columns = ['id', 'name', 'lat', 'long', 'time', 'closest track point', 'elev']
 
     return closest
-
-    # # save to a csv file with addition
-    # data_locs.to_csv('comb.csv', mode='a', header=False, index=False)
-    # print('Single LIDAR merge performmed')
-    # print('*---------------------------*')
 
 
 def matchElev(poidir, trackdir):
